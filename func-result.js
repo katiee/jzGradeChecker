@@ -63,7 +63,7 @@ jzgc.result = {
 			return false;
 		});
 
-		$('#breadcrumb', $dest).append('<li title="学号"><i class="icon-user" /> '+ resultData.meta['学号'] +'</li> <li title="姓名" class="dropdown">'+ resultData.meta['姓名'] +' <a role="button" href="javascript:void(0)" id="meta-detail-btn" class="dropdown-toggle" title="更多信息" data-toggle="dropdown"><i class="icon-chevron-down"></i></a><ul role="menu" aria-labelledby="meta-detail-btn" id="meta-detail-menu" class="dropdown-menu"></ul> <span class="divider">&rsaquo;</span></li> <li class="active" title="考试场次（名称可能与首页不符）"><i class="icon-book" /> '+ resultData.meta['考试场次'] +'</li>');
+		$('#breadcrumb', $dest).append('<li title="学号"><i class="icon-user" /> '+ resultData.meta['原学号'] +'</li> <li title="姓名" class="dropdown">'+ resultData.meta['姓名'] +' <a role="button" href="javascript:void(0)" id="meta-detail-btn" class="dropdown-toggle" title="更多信息" data-toggle="dropdown"><i class="icon-chevron-down"></i></a><ul role="menu" aria-labelledby="meta-detail-btn" id="meta-detail-menu" class="dropdown-menu"></ul> <span class="divider">&rsaquo;</span></li> <li class="active" title="考试场次（名称可能与首页不符）"><i class="icon-book" /> '+ resultData.meta['考试场次'] +'</li>');
 		var $mdm = $('#meta-detail-menu', $dest);
 		for(key in resultData.meta){
 			if(!resultData.meta[key]) continue;
@@ -193,7 +193,7 @@ jzgc.result = {
 		if(grade_this){ // 能读到学籍号就用学籍号判断级数
 			grade_this = new Date().getFullYear().toString().substr(0, 2) + grade_this;
 		}else{
-			grade_this = new Date().getFullYear() - resultData.meta['学号'].substr(0, 1);
+			grade_this = new Date().getFullYear() - resultData.meta['原学号'].substr(0, 1);
 			if(new Date().getMonth() > 6){ // 8-12 月
 				grade_this++;
 			}
@@ -247,10 +247,11 @@ jzgc.result = {
 			}
 		});
 
-		if(resultData.meta['科类']){
+		var subjectType = this.getSubjectType(resultData);
+		if(subjectType){
 			$average.find('tr').each(function(i, t){
-				var $t = $(t);
-				if($t.find('td:first').text().replace(/(\s)/g,'') == resultData.meta['科类']){
+				var $t = $(t), title = $t.find('td:first').text().replace(/(\s)/g,'');
+				if(title == subjectType || title == subjectType.substr(0, 1)){
 					$t.next().addBack().addClass('info');
 					$t.find('td').css('font-weight', 'bold');
 				}
@@ -259,6 +260,22 @@ jzgc.result = {
 
 		$average.appendTo($dest);
 		$dest = undefined;
+	},
+	getSubjectType: function(d){
+		var hasST, ST; // ST = S / L
+		for(i in d.gradeData.subjects){
+			if(d.gradeData.subjects[i] == '综合'){
+				hasST = true;
+			}
+			// 据说这里体现偏好
+			if(d.gradeData.subjects[i] == '物理'){
+				ST = 'S';
+			}
+			if(d.gradeData.subjects[i] == '地理'){
+				ST = 'L';
+			}
+		}
+		return hasST ? (ST == 'L' ? '文科' : '理科') : false;
 	},
 	getTableData: function($Elem, useInt){
 		var r = {'subjects':[], 'series':[]},
