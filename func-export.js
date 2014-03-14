@@ -177,7 +177,7 @@ jzgc.export = {
 			$('<p />').html(t).addClass(type ? ('text-' + type) : '').prependTo($log);
 		}
 		//ks考试场次，可改为读取页面选项
-      		var ks=22, $xml='';  
+		var ks=12, $xml='';  
 		for(id in jzgc.config.examList){
 			list.push([id, jzgc.config.examList[id]]);
 			if (id==ks) {pointer=list.length-1;}
@@ -194,7 +194,7 @@ jzgc.export = {
 		}
 		pusr =0;
 		//$xml += list[pointer][1] + '(' + list[pointer][0] + ')\n';
-		$xml += '学号,姓名,性别,新学号,类型';
+		$xml += '学号,姓名,性别,新学号';
 
 		if(user[1] == 'KONAMIMODE'){
 			//jzgc.user.clear(0);
@@ -212,9 +212,12 @@ jzgc.export = {
 				{xuehao: user[0], password: user[1], kaoshi: list[pointer][0]},
 				function(data){
 					if(!dataFirst){
-						for(i in data.gradeData.subjects){
-							$xml += ','+data.gradeData.subjects[i];
+					 for(i in data.gradeData.series){
+						$xml += ','+data.gradeData.series[i].name;
+						for(j in data.gradeData.subjects){
+							$xml += ','+data.gradeData.subjects[j];
 						}
+					 }	
 					$xml += '\n';
 					}
 
@@ -232,17 +235,17 @@ jzgc.export = {
 					data.examName = list[pointer][1];
 					ret.exams.push(data);
 
-					for(i in data.gradeData.series){
 						$xml += data.meta['学号']+',';
 						$xml += data.meta['姓名']+',';
 						$xml += data.meta['性别']+',';
-						$xml += data.meta['新学号']+',';	
-						$xml += data.gradeData.series[i].name;
+						$xml += data.meta['新学号'];	
+					for(i in data.gradeData.series){
+						$xml += ','+data.gradeData.series[i].name;
 						for(j in data.gradeData.subjects){
 							$xml += ','+data.gradeData.series[i].data[j];
 						}
-						$xml += '\n';
 					}					
+						$xml += '\n';
 
 					log('已保存 ' + usrlist[pusr]+'   '+ list[pointer][1] + ' (' + list[pointer][0] + ') ');
 					pusr++;
@@ -319,11 +322,11 @@ jzgc.export = {
 				$('#content-export').append('<h2>终于导出了 '+ret.exams.length+' 场考试的数据</h2><p>反正数据都在这里头了，先存着就是了。您可以在成绩查询页面的“导出”按钮旁的下拉菜单中找到查看器。<a href="'+ chrome.extension.getURL("jsonReader.html") +'" class="btn btn-small" target="_blank">打开查看器</a></p><p><span class="label label-info">ProTip</span> 文件是 JSON 格式，技术宅们也可以自己读数据出来。</p><p>请复制并保存文本框中的内容 <span>或直接 <a href="javascript:void(0)" id="save-btn" role="button" class="btn btn-primary btn-small" title="下载导出数据为 '+fileName+'"><i class="icon-file icon-white" /> 保存文件</a></span></p><textarea id="result" class="input-xxlarge" rows="6"></textarea><p>有空的话，来吐槽导出的使用体验吧！ <a href="http://github.phy25.com/jzGradeChecker/exportgotit.html" class="btn btn-small btn-success" target="_blank"><i class="icon-comment icon-white" /> 吐个槽</a></p>');
 				$('#result').text(JSON.stringify(ret))[0];
 
-				//导出csv格式，utf-8，使用Excel读取
+				//导出csv格式，utf-8，另存ANSI格式，使用Excel读取
 				$('#content-export').append('<div id="export-xml"> <textarea id="result-xml" class="span12" rows="5"></textarea>');  
 				$('#result-xml').text($xml);
-				var filexml = 'exams-' +list[pointer][1] +'.txt';
-				$('#export-xml').append('<p>请复制并保存文本框中的内容<span>或直接 <a href="javascript:void(0)" id="save-xml" role="button" class="btn btn-primary btn-small" title="下载导出数据为 '+filexml+'"><i class="icon-file icon-white" /> 保存文件</a></span></p>');
+				var filexml = 'exams-' +list[pointer][1] +'.csv';
+				$('#export-xml').append('<p>请复制文本框中的内容并保存为csv文件，<span>或直接 <a href="javascript:void(0)" id="save-xml" role="button" class="btn btn-primary btn-small" title="下载导出数据为 '+filexml+'"><i class="icon-file icon-white" /> 保存文件</a></span></p>');
 
 				try{ var isFileSaverSupported = !!new Blob(); } catch(e){}
 				if(isFileSaverSupported){
