@@ -35,6 +35,11 @@ function startExecution(){
 		// Save the time to give hints on index.js
 		jzgc.user.attrSave('lastChecked', +new Date());
 		jzgc.user.attrSave('name', resultData.meta['姓名']);
+		// kt 原学号复制为学号
+		if (resultData.meta['学号']==undefined) {
+			resultData.meta['学号']=resultData.meta['原学号'];
+		}
+
 		if(resultData.meta['新学号'] && resultData.meta['新学号'].substr(1, 4) != resultData.meta['原学号'].substr(1, 4)){
 			jzgc.user.attrSave('newxuehao', resultData.meta['新学号']);
 		}else{
